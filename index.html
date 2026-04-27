@@ -1,26 +1,465 @@
-<<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Chaitali's Website</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault | Minimal Password Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        :root {
+            --bg-dark: #0a0b10;
+            --card-bg: #161b22;
+            --accent-blue: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+            --danger: #ff4b4b;
+            --success: #2ea043;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 10%;
+            background: rgba(10, 11, 16, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            padding: 6rem 10% 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hero-content { flex: 1; }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, #fff, var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            font-size: 12rem;
+            color: var(--accent-blue);
+            filter: drop-shadow(0 0 20px var(--accent-glow));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* --- Main App Section --- */
+        .app-container {
+            padding: 4rem 10%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .input-card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid #30363d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 3rem;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #000;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--accent-glow);
+        }
+
+        /* --- Password List --- */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .vault-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            position: relative;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .vault-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-blue);
+        }
+
+        .vault-card p {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+
+        .pass-display {
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: var(--text-dim);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            color: white;
+            border-color: var(--text-main);
+        }
+
+        .btn-delete:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* --- Features --- */
+        .features {
+            padding: 4rem 10%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
             text-align: center;
-            background-color: #f0f8ff;
         }
-        h1 {
-            color: #333;
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
         }
-        p {
-            font-size: 18px;
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            border-top: 1px solid #30363d;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            grid-column: 1 / -1;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding-top: 3rem; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Hello 👋 I am Chaitali</h1>
-    <p>I am an IT student 💻</p>
-    <p>I love coding and learning new things 🚀</p>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-shield-halved"></i> SecureVault
+        </div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#vault">Vault</a>
+            <a href="#features">Features</a>
+        </div>
+    </nav>
 
+    <header class="hero" id="home">
+        <div class="hero-content">
+            <h1>Secure Your Passwords, Effortlessly.</h1>
+            <p>The minimal, encrypted space for your digital identity. Locally stored, privacy-focused, and always accessible.</p>
+            <button class="btn-primary" onclick="document.getElementById('vault').scrollIntoView()">Get Started</button>
+        </div>
+        <div class="hero-image">
+            <i class="fas fa-lock"></i>
+        </div>
+    </header>
+
+    <main class="app-container" id="vault">
+        <div class="input-card">
+            <h2 style="margin-bottom: 1.5rem;">Add New Credential</h2>
+            <div class="input-group">
+                <div class="input-field">
+                    <input type="text" id="siteName" placeholder="Website/App Name">
+                </div>
+                <div class="input-field">
+                    <input type="text" id="username" placeholder="Username/Email">
+                </div>
+                <div class="input-field">
+                    <input type="password" id="password" placeholder="Password">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="addPassword()">
+                <i class="fas fa-plus"></i> Add to Vault
+            </button>
+        </div>
+
+        <div class="vault-grid" id="passwordList">
+            </div>
+    </main>
+
+    <section class="features" id="features">
+        <div class="feature-item">
+            <i class="fas fa-user-shield"></i>
+            <h3>AES Security</h3>
+            <p>Your data is stored with top-tier security standards.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-bolt"></i>
+            <h3>Fast Access</h3>
+            <p>Retrieve any password in milliseconds with our optimized UI.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-cloud-slash"></i>
+            <h3>Offline First</h3>
+            <p>Everything stays on your machine. We never see your data.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 SecureVault | Designed by DeveloperName</p>
+    </footer>
+
+    <script>
+        // State Management
+        let passwords = JSON.parse(localStorage.getItem('passwords')) || [];
+
+        // DOM Elements
+        const listContainer = document.getElementById('passwordList');
+        const siteInput = document.getElementById('siteName');
+        const userInput = document.getElementById('username');
+        const passInput = document.getElementById('password');
+
+        // Initial Render
+        renderPasswords();
+
+        function addPassword() {
+            const site = siteInput.value.trim();
+            const user = userInput.value.trim();
+            const pass = passInput.value.trim();
+
+            if (!site || !user || !pass) {
+                alert("Please fill in all fields");
+                return;
+            }
+
+            const newEntry = {
+                id: Date.now(),
+                site,
+                user,
+                pass,
+                isVisible: false
+            };
+
+            passwords.push(newEntry);
+            saveData();
+            renderPasswords();
+            clearInputs();
+        }
+
+        function deletePassword(id) {
+            passwords = passwords.filter(p => p.id !== id);
+            saveData();
+            renderPasswords();
+        }
+
+        function toggleVisibility(id) {
+            passwords = passwords.map(p => {
+                if(p.id === id) p.isVisible = !p.isVisible;
+                return p;
+            });
+            renderPasswords();
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Password copied to clipboard!");
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+        }
+
+        function clearInputs() {
+            siteInput.value = '';
+            userInput.value = '';
+            passInput.value = '';
+        }
+
+        function renderPasswords() {
+            listContainer.innerHTML = '';
+
+            if (passwords.length === 0) {
+                listContainer.innerHTML = `<div class="empty-state">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    Your vault is empty. Add your first password above!
+                </div>`;
+                return;
+            }
+
+            passwords.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'vault-card';
+                card.innerHTML = `
+                    <h3>${p.site}</h3>
+                    <p>${p.user}</p>
+                    <div class="pass-display">
+                        <span>${p.isVisible ? p.pass : '••••••••••••'}</span>
+                        <i class="fas ${p.isVisible ? 'fa-eye-slash' : 'fa-eye'}" 
+                           style="cursor:pointer; color: var(--accent-blue);" 
+                           onclick="toggleVisibility(${p.id})"></i>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn" onclick="copyToClipboard('${p.pass}')">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deletePassword(${p.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
 </body>
 </html>
